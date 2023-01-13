@@ -1,0 +1,23 @@
+---
+title: "Plots Demo"
+author: "JeremieDB"
+date: "2023-01-12"
+format:
+  html:
+    code-fold: true
+    # font-size: 0.8em
+jupyter: python3
+---
+
+## Parametric Plots
+
+Plot function pair (x(u), y(u)). 
+See @fig-parametric for an example.
+
+```{python}
+#| label: fig-parametric
+#| fig-cap: "Parametric Plots"
+import numpy as np
+
+numpy.__VERSION__
+```

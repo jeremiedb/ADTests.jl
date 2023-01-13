@@ -1,0 +1,29 @@
+---
+title: "Plots Demo"
+author: "JeremieDB"
+date: "2023-01-12"
+format:
+  html:
+    code-fold: true
+    # font-size: 0.8em
+jupyter: julia-1.7
+---
+
+## Parametric Plots
+
+Plot function pair (x(u), y(u)). 
+See @fig-parametric for an example.
+
+```{julia}
+#| label: fig-parametric
+#| fig-cap: "Parametric Plots"
+
+using Plots
+
+plot(sin, 
+     x->sin(2x), 
+     0, 
+     2π, 
+     leg=false, 
+     fill=(0,:lavender))
+```
