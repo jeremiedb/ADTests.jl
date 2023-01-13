@@ -4,7 +4,7 @@
 
 ### Zygote.jl
 
-`/zygote/dense.jl`
+`/experiments/zygote/dense.jl`
 
 ```julia
 #  47.057 ms (28 allocations: 105.00 MiB)
@@ -13,7 +13,7 @@
 
 ## Tracker.jl
 
-`/tracker/dense.jl`
+`/experiments/tracker/dense.jl`
 
 ```julia
 #  66.045 ms (140 allocations: 107.02 MiB)
@@ -22,7 +22,7 @@
 
 ## Yota.jl
 
-`/yota/dense.jl`
+`/experiments/yota/dense.jl`
 
 ```julia
 # 43.431 ms (77 allocations: 89.01 MiB)
@@ -31,7 +31,7 @@
 
 ### AutoGrad.jl
 
-`/autograd/dense.jl`
+`/experiments/autograd/dense.jl`
 
 ```julia
 #  37.210 ms (154 allocations: 81.01 MiB)
@@ -48,7 +48,7 @@ Requires Julia v1.10
 
 ## Manuel forward-backwards
 
-`/manual/dense.jl`
+`/experiments/manual/dense.jl`
 
 ```julia
 # 42.532 ms (34 allocations: 81.00 MiB)
