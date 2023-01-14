@@ -17,3 +17,6 @@ Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
 Yota = "cd998857-8626-517d-b929-70ad188a48f0"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+
+[compat]
+julia = "1.8"
