@@ -12,6 +12,7 @@ h1 = 512
 w1 = randn(h1, f) .* 0.01;
 b1 = randn(h1);
 x = randn(f, bs) .* 0.01;
+y = randn(h1, bs) .* 0.01;
 
 struct MyDense{A,B}
     w::A
@@ -38,3 +39,15 @@ loss, grads = zygote_test(m, x)
 
 #  47.057 ms (28 allocations: 105.00 MiB)
 @btime zygote_test($m, $x);
+
+
+# my_loss2(m, x, y) = sum(m(x) .* y)
+# function zygote_test2(m, x, y)
+#     loss, grads = withgradient(model -> my_loss2(model, x, y), m)
+#     # return nothing
+#     return loss, grads
+# end
+# loss, grads = zygote_test2(m, x, y)
+
+# #  47.057 ms (28 allocations: 105.00 MiB)
+# @btime zygote_test2($m, $x, $y);
