@@ -5,9 +5,9 @@
 
 Survey of potential options to center traditionnal ML around.
 
-
 | |Tracker|ReversedDiff|Yota|Nabla|Autograd|
 |:---:|:---:|:---:|:---:|:---:|:---:|
+| |https://github.com/FluxML/Tracker.jl|https://github.com/JuliaDiff/ReverseDiff.jl|https://github.com/dfdx/Yota.jl|https://github.com/invenia/Nabla.jl|https://github.com/denizyuret/AutoGrad.jl|
 |Principle|Tape base|Tape base|Tape base|Tape base|Tape base|
 |GPU support|Y|?|Y|Y|Y|
 |Second/higher order|?|Y|N|N|Y|
