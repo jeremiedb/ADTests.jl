@@ -16,7 +16,7 @@ Survey of potential options to center traditionnal ML around.
 |Maintenance|inactive|limited - 2-3 persons|active - 1 person|limited - 2 persons|inactive - 1 person|
 |Pre-allocation support| |Y| | | |
 |Performance (1-5)|2|4|4| |4|
-|Robust stateful accumulation (RNN)| | | | | |
+|Robust accumulation (RNN)| | | | | |
 |Upsides| | | | | |
 |Downsides| | | | | |
 
