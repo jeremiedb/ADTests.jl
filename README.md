@@ -1,5 +1,26 @@
 # AD Tests
 
+
+## Tape based ecosystem
+
+Survey of potential options to center traditionnal ML around.
+
+
+| |Tracker|ReversedDiff|Yota|Nabla|Autograd|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|Principle|Tape base|Tape base|Tape base|Tape base|Tape base|
+|GPU support|Y|?|Y|Y|Y|
+|Second/higher order|?|Y|N|N|Y|
+|ForwardDiff|N|Y|N|N|N|
+|ChainRules support|N|Y|Y|Y|N|
+|Maintenance|inactive|limited - 2-3 persons|active - 1 person|limited - 2 persons|inactive - 1 person|
+|Pre-allocation support| |Y| | | |
+|Performance (1-5)|2|4|4| |4|
+|Robust stateful accumulation (RNN)| | | | | |
+|Upsides| | | | | |
+|Downsides| | | | | |
+
+
 ## Dense layer with exp activation
 
 ### Zygote.jl
@@ -38,6 +59,19 @@
 @btime autograd_test($x, $w1, $b1);
 ```
 
+### ReverseDiff.jl
+
+`/experiments/reversediff/dense.jl`
+
+```julia
+# 47.326 ms (0 allocations: 0 bytes)
+@btime gradient!($results, $compiled_f_tape, $inputs);
+# 61.471 ms (113 allocations: 139.01 MiB)
+@btime gradient!($results, $rd_loss, $inputs);
+# 60.507 ms (119 allocations: 148.02 MiB)
+@btime gradient($rd_loss, $inputs);
+```
+
 ## Nabla.jl
 
 Stack overflow crash on rand().
@@ -46,7 +80,7 @@ Stack overflow crash on rand().
 
 Requires Julia v1.10
 
-## Manuel forward-backwards
+## Manual forward-backward
 
 `/experiments/manual/dense.jl`
 
