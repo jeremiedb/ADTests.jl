@@ -13,7 +13,7 @@ Survey of potential options to center traditionnal ML around.
 |Second/higher order|?|Y|N|N|Y|
 |ForwardDiff|N|Y|N|N|N|
 |ChainRules support|N|Y|Y|Y|N|
-|Maintenance|inactive|limited - 2-3 persons|active - 1 person|limited - 2 persons|inactive - 1 person|
+|Maintenance|inactive|limited - 2/3 persons|active - 1 person|limited - 1/2 persons|inactive - 1 person|
 |Pre-allocation support| |Y| | | |
 |Performance (1-5)|2|4|4| |4|
 |Robust accumulation (RNN)| | | | | |
