@@ -23,17 +23,14 @@ Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
 println(dmodel)
 
 
-
 model = Chain(Dense(256 => 512))
-x = randn(rng, Float32, 256, 512);
-
+x = randn(rng, Float32, 256, 4096);
 loss(model, x) = sum(model(x))
-
 dmodel = Flux.fmap(model) do x
     x isa Array ? zero(x) : x
 end
+@time Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
 
-Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
 println(dmodel)
 
 function f1(x::Array{Float64}, y::Array{Float64})
