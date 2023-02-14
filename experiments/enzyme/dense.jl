@@ -2,7 +2,7 @@ using Revise
 # using LoopVectorization
 # using Tullio
 using Random: seed!
-using Base.Threads 
+using Base.Threads
 using Enzyme
 
 using BenchmarkTools
@@ -12,9 +12,9 @@ function f1(x::Array{Float64}, y::Array{Float64})
     return nothing
 end;
 
-x  = rand(3, 3)
+x = rand(3, 3)
 bx = zeros(3, 3)
-y  = [0.0]
+y = [0.0]
 by = [1.0];
 
 bx
@@ -27,9 +27,9 @@ function f2(x::Array{Float64})
     return y
 end;
 
-x  = rand(3, 3)
+x = rand(3, 3)
 bx = zeros(3, 3)
-y  = 0.0;
+y = 0.0;
 by = 1.0;
 
 f2(x)
@@ -85,10 +85,53 @@ dw1 = zeros(h1, f);
 x = randn(f, bs) .* 0.01;
 
 @time f4(x, w1)
-@btime f4($x, $w1)
+# @btime f4($x, $w1)
 @time out = Enzyme.autodiff(Reverse, f4, Const, Const(x), Duplicated(w1, dw1))
 
 # ERROR: Conversion of boxed type Matrix{Float64} is not allowed
 # Array needs to be duplicated - not just Active
 # y2 = Enzyme.autodiff(Reverse, f3, x, Active(w1), Active(b1));
-@btime Enzyme.autodiff(Reverse, f4, Const($x), Duplicated($w1, $dw1));
+@time Enzyme.autodiff(Reverse, f4, Const(x), Duplicated(w1, dw1));
+# @time Enzyme.autodiff(Reverse, f4, Const($x), Duplicated($w1, $dw1));
+
+
+using Base.Experimental: @aliasscope, Const
+function f5(x::Array{Float64}, w::Array{Float64})
+    @aliasscope let x = x, w = w
+        sum(w * x)
+    end
+    return nothing
+end;
+
+seed!(123)
+bs = 4096
+f = 256
+h1 = 512
+w1 = randn(h1, f) .* 0.01;
+dw1 = zeros(h1, f);
+x = randn(f, bs) .* 0.01;
+
+@time f5(x, w1)
+# @btime f5($x, $w1)
+@time out = Enzyme.autodiff(Reverse, f5, Const, Const(x), Duplicated(w1, dw1))
+
+
+using Base.Experimental: @aliasscope, Const
+function f6(x::Array{Float64}, w::Array{Float64})
+    x = Base.unalias(x, x)
+    w = Base.unalias(w, w)
+    z = sum(w * x)
+    return z
+end;
+
+seed!(123)
+bs = 4096
+f = 256
+h1 = 512
+w1 = randn(h1, f) .* 0.01;
+dw1 = zeros(h1, f);
+x = randn(f, bs) .* 0.01;
+
+@time f6(x, w1)
+# @btime f6($x, $w1)
+@time out = Enzyme.autodiff(Reverse, f6, Const, Const(x), Duplicated(w1, dw1))
