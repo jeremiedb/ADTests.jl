@@ -1,13 +1,13 @@
 using Revise
 # using LoopVectorization
 # using Tullio
+using Random
 using Random: seed!
 using Base.Threads
 using Flux
 using Enzyme
 using BenchmarkTools
 
-using Flux, Random, Enzyme
 rng = Random.default_rng()
 
 loss(model, x) = sum(model(x))
@@ -22,14 +22,16 @@ end
 Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
 println(dmodel)
 
-
 model = Chain(Dense(256 => 512))
 x = randn(rng, Float32, 256, 4096);
+# model = Chain(Dense(32 => 64))
+# x = randn(rng, Float32, 32, 128);
 loss(model, x) = sum(model(x))
 dmodel = Flux.fmap(model) do x
     x isa Array ? zero(x) : x
 end
 @time Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
+@btime Enzyme.autodiff(loss, Duplicated(model, dmodel), Const(x))
 
 println(dmodel)
 
