@@ -4,7 +4,6 @@ using Revise
 using Random: seed!
 using Base.Threads
 using Enzyme
-
 using BenchmarkTools
 
 function f1(x::Array{Float64}, y::Array{Float64})
@@ -19,8 +18,7 @@ by = [1.0];
 
 bx
 by
-Enzyme.autodiff(f1, Const, Duplicated(x, bx), Duplicated(y, by))
-Enzyme.autodiff(Reverse, f1, Duplicated(x, bx), Duplicated(y, by));
+Enzyme.autodiff(Reverse, f1, Const, Duplicated(x, bx), Duplicated(y, by))
 
 function f2(x::Array{Float64})
     y = sum(x * x)
@@ -34,7 +32,6 @@ by = 1.0;
 
 f2(x)
 y2 = Enzyme.autodiff(Reverse, f2, Duplicated(x, bx));
-
 
 function f3(x::Array{Float64}, w::Array{Float64}, b::Vector{Float64})
     # z = sum(exp.(w * x .+ b))
