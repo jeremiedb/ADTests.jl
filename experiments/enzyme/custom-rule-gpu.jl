@@ -32,18 +32,24 @@ Enzyme.autodiff(Reverse, f_gpu, Duplicated(x, dx))
 # 
 ########################
 function sqrt_gpu(x)
-    threads = size(x)
+    threads = length(x)
     @cuda blocks = (1,) threads = threads sqrt_kernel!(x)
     CUDA.synchronize()
 end
 
 function sqrt_kernel!(x)
-    i, j = threadIdx().x, threadIdx().y
-    x[i, j] = sqrt(x[i, j])
+    i = threadIdx().x
+    x[i] = sqrt(x[i])
     sync_threads()
+    return nothing
+end
+
+function sqrt_kernel_grad!(x, dx)
+    autodiff_deferred(Reverse, sqrt_gpu, Const, Duplicated(x, dx))
     return nothing
 end
 
 x = CUDA.zeros(5, 3) .+ CuArray(1:2:9)
 dx = CUDA.ones(5, 3)
-Enzyme.autodiff(Reverse, sqrt_gpu, Duplicated(x, dx))
+# sqrt_gpu(x)
+@cuda blocks = (1,) threads = length(x) sqrt_kernel_grad!(x, dx)
