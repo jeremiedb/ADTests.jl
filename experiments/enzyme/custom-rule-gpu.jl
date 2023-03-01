@@ -45,11 +45,11 @@ function sqrt_kernel!(x)
 end
 
 function sqrt_kernel_grad!(x, dx)
-    autodiff_deferred(Reverse, sqrt_gpu, Const, Duplicated(x, dx))
+    autodiff_deferred(Reverse, sqrt_kernel!, Const, Duplicated(x, dx))
     return nothing
 end
 
 x = CUDA.zeros(5, 3) .+ CuArray(1:2:9)
 dx = CUDA.ones(5, 3)
 # sqrt_gpu(x)
-@cuda blocks = (1,) threads = length(x) sqrt_kernel_grad!(x, dx)
+@cuda blocks = (1,) threads = length(x) sqrt_kernel_grad!(x, dx);
