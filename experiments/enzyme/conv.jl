@@ -2,21 +2,42 @@
 # using Random: seed!
 using Enzyme
 using NNlib
-# using Flux
 
+loss(w, x) = sum(conv(x, w))
 #############################################
-# direct params
+# im2col algo
 #############################################
 w = randn(Float32, 3, 3, 5, 7);
-dw = zero(w)
+dw = zero(w);
 # m(w, x) = conv(x, w)
-loss(w, x) = sum(conv(x, w))
 x = randn(Float32, (3, 3, 5, 8));
 # size(x)
 
-@time m(w, x);
+# @time m(w, x);
 @time loss(w, x);
-grads = Enzyme.autodiff(loss, Duplicated(w, dw), Const(x));
+grads = Enzyme.autodiff(Reverse, loss, Duplicated(w, dw), Const(x));
+
+
+@code_warntype conv(x, w);
+@code_lowered conv(x, w);
+@code_typed conv(x, w);
+@code_llvm conv(x, w);
+@code_native conv(x, w);
+
+
+#############################################
+# direct conv algo
+#############################################
+w = randn(Float32, 3, 3, 5, 7);
+dw = zero(w);
+x = randn(Float64, (3, 3, 5, 8));
+dx = zero(x);
+
+# @time m(w, x);
+@time loss(w, x);
+grads = Enzyme.autodiff(Reverse, loss, Duplicated(w, dw), Const(x));
+grads = Enzyme.autodiff(Reverse, loss, Duplicated(w, dw), Duplicated(x, dx));
+
 
 #############################################
 # Custom struct
