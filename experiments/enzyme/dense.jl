@@ -3,6 +3,7 @@ using Revise
 # using Tullio
 using Random: seed!
 using Base.Threads
+using Random: seed!
 using Enzyme
 using BenchmarkTools
 
@@ -11,6 +12,7 @@ function f1(x::Array{Float64}, y::Array{Float64})
     return nothing
 end;
 
+seed!(123)
 x = rand(3, 3)
 bx = zeros(3, 3)
 y = [0.0]
@@ -25,13 +27,33 @@ function f2(x::Array{Float64})
     return y
 end;
 
+seed!(123)
 x = rand(3, 3)
 bx = zeros(3, 3)
-y = 0.0;
-by = 1.0;
 
 f2(x)
-y2 = Enzyme.autodiff(Reverse, f2, Duplicated(x, bx));
+_, y = Enzyme.autodiff(ReverseWithPrimal, f2, Duplicated(x, bx));
+
+
+
+function mymatmul(x::AbstractMatrix, w::AbstractMatrix)
+    out = sum(w * x)
+    return out
+end;
+
+seed!(123)
+bs = 4096
+f = 256
+h1 = 512
+w = randn(h1, f) .* 0.01;
+x = randn(f, bs) .* 0.01;
+dw = zeros(h1, f);
+# dx = zeros(f, bs);
+
+@time mymatmul(x, w)
+@time _, y = Enzyme.autodiff(ReverseWithPrimal, mymatmul, Const(x), Duplicated(w, dw))
+
+
 
 function f3(x::Array{Float64}, w::Array{Float64}, b::Vector{Float64})
     # z = sum(exp.(w * x .+ b))

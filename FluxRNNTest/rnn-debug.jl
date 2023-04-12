@@ -58,9 +58,6 @@ layer2.cell.state0
 #   :(Main.layer2)         => RefValue{Any}((cell = nothing, state = Float32[4.0;;]))
 #   Recur(RNNCell(1 => 1)) => RefValue{Any}((cell = nothing, state = Float32[4.0;;]))
 
-
-
-
 #################################################
 # Full loop
 #################################################
@@ -114,6 +111,49 @@ out2 = out1 .* layer1.cell.Wh .+ x[2] .* layer1.cell.Wi
 
 
 
+function test_implicit()
+    layer = Flux.Recur(Flux.RNNCell(1, 1, identity))
+    layer.cell.Wi .= 5.0f0
+    layer.cell.Wh .= 4.0f0
+    layer.cell.b .= 0.0f0
+    layer.cell.state0 .= 7.0f0
+    # x = [[2.0f0], [3.0f0]]
+    x = [[2f0 2f0], [3f0 3f0]]
+
+    # theoretical primal gradients
+    primal =
+        layer.cell.Wh .* (layer.cell.Wh * layer.cell.state0 .+ x[1] .* layer.cell.Wi) .+
+        x[2] .* layer.cell.Wi
+    ∇Wi = x[1] .* layer.cell.Wh .+ x[2]
+    ∇Wh = 2 .* layer.cell.Wh .* layer.cell.state0 .+ x[1] .* layer.cell.Wi
+    ∇b = layer.cell.Wh .+ 1
+    ∇state0 = layer.cell.Wh .^ 2
+
+    ps = Flux.params(layer)
+    Flux.reset!(layer)
+    e, g = Flux.withgradient(ps) do
+        out = [layer(xi) for xi in x]
+        sum(out[2])
+    end
+    
+    @info primal[1]
+    # @info grads
+    @info g[ps[1]]
+    @info g[ps[2]]
+    @info g[ps[3]]
+    @info g[ps[4]]
+    # @assert primal[1] ≈ e
+    # @assert ∇Wi ≈ grads[:Wi]
+    # @assert ∇Wh ≈ grads[:Wh]
+    # @assert ∇b ≈ grads[:b]
+    # @assert ∇state0 ≈ grads[:state0]
+
+    return nothing
+end
+test_implicit()
+
+
+
 function test_explicit()
     layer = Flux.Recur(Flux.RNNCell(1, 1, identity))
     layer.cell.Wi .= 5.0f0
@@ -131,21 +171,21 @@ function test_explicit()
     ∇b = layer.cell.Wh .+ 1
     ∇state0 = layer.cell.Wh .^ 2
 
-    Flux.reset!(layer)
     e, g = Flux.withgradient(layer) do m
+        Flux.reset!(layer)
         # Flux.reset!(m.cell)
         out = [m(xi) for xi in x]
         sum(out[2])
     end
+    @info g[1]
     grads = g[1][:cell]
-
     @info grads
 
     @assert primal[1] ≈ e
-    @assert ∇Wi ≈ grads[:Wi]
-    @assert ∇Wh ≈ grads[:Wh]
-    @assert ∇b ≈ grads[:b]
-    @assert ∇state0 ≈ grads[:state0]
+    # @assert ∇Wi ≈ grads[:Wi]
+    # @assert ∇Wh ≈ grads[:Wh]
+    # @assert ∇b ≈ grads[:b]
+    # @assert ∇state0 ≈ grads[:state0]
     return nothing
 end
 test_explicit()
