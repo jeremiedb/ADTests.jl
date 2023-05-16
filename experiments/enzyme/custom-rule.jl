@@ -1,6 +1,6 @@
 using Revise
 using Enzyme
-import .EnzymeRules: augmented_primal, reverse, Annotation, has_rrule, has_rrule_from_sig
+import .EnzymeRules: augmented_primal, reverse
 using .EnzymeRules
 
 function my_sqrt_scalar(x)
@@ -11,8 +11,8 @@ function augmented_primal(
     config::ConfigWidth{1},
     func::Const{typeof(my_sqrt_scalar)},
     ::Type{<:Active},
-    x::Active,
-)
+    x::Active)
+
     if needs_primal(config)
         return AugmentedReturn(func.val(x.val), nothing, nothing)
     else
@@ -25,8 +25,8 @@ function reverse(
     ::Const{typeof(my_sqrt_scalar)},
     dret::Active,
     tape,
-    x::Active,
-)
+    x::Active)
+
     if needs_primal(config)
         # return (x.val*dret.val,)
         return (23.0,)
