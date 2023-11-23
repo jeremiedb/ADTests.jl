@@ -1,5 +1,4 @@
 using Revise
-using BenchmarkTools
 using Statistics
 using Random: seed!
 using LoopVectorization
