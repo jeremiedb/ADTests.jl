@@ -4,17 +4,14 @@ authors = ["jeremie <jeremie.desgagne.bouchard@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-AutoGrad = "6710c13c-97f1-543f-91c5-74e8f7d95b35"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
-NNlibCUDA = "a00861dc-f156-4864-bf3c-e6376f28a68d"
-Nabla = "49c96f43-aa6d-5a04-a506-44c7070ebe78"
 Optimisers = "3bd65402-5787-11e9-1adc-39752487f4e2"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
-Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
 Yota = "cd998857-8626-517d-b929-70ad188a48f0"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"

@@ -45,7 +45,7 @@ std(y_nlib)
 @inline _point_conv!(y, x, w) = dropdims(sum!(y, x .* w); dims=1)
 
 xi = x[:, 1, 1, 1]
-yi = zeros(Float32, 1, FO, KW, KH)
+yi = zeros(Float32, 1, CO, KW, KH)
 
 @time pci = _point_conv(xi, w);
 @time _point_conv!(yi, xi, w);
@@ -55,7 +55,7 @@ yi = zeros(Float32, 1, FO, KW, KH)
 function my_conv_1!(y, x, w)
     y .= 0
     @threads for b in axes(x, 4)
-        @inbounds for hi in axes(x, 3)
+        for hi in axes(x, 3)
             for wi in axes(x, 2)
                 xi = view(x, :, wi, hi, b)
                 view(y, :, wi:wi+2, hi:hi+2, b) .+= _point_conv(xi, w)
@@ -76,8 +76,8 @@ function my_conv_2!(y, x, w)
     y .= 0
     @threads for b in axes(x, 4)
         yi = zeros(Float32, 1, 16, 3, 3)
-        @inbounds for hi in axes(x, 3)
-            @inbounds for wi in axes(x, 2)
+        for hi in axes(x, 3)
+            for wi in axes(x, 2)
                 xi = view(x, :, wi, hi, b)
                 view(y, :, wi:wi+2, hi:hi+2, b) .+= _point_conv!(yi, xi, w)
             end
@@ -93,7 +93,7 @@ std(y)
 std(y[:, 3:end-2, 3:end-2, :])
 
 
-function _dot_prod_lv!(C, A, B)
+function _dot_prod_lv2A!(C, A, B)
     @turbo for n ∈ axes(B, 2)
         Cn = zero(eltype(C))
         for k ∈ eachindex(A)
@@ -103,20 +103,20 @@ function _dot_prod_lv!(C, A, B)
     end
 end
 
-function _point_conv_lv!(y, x, w)    
-    _dot_prod_lv!(y, x, w)
+function _point_conv_lv2A!(y, x, w)    
+    _dot_prod_lv2A!(y, x, w)
     return reshape(y, 16, 3, 3)
 end
 
 xi = x[:, 1, 1, 1]
 yi = zeros(Float32, CO * KW * KH)
 w_flat = reshape(w, 8, :)
-# _dot_prod_lv!(yi, xi, w_flat)
-# @btime _dot_prod_lv!(yi, xi, w_flat)
-# @time yi_out = _point_conv_lv!(yi, xi, w_flat);
-# @btime yi_out = _point_conv_lv!(yi, xi, w_flat);
+# _dot_prod_lv2A!(yi, xi, w_flat)
+# @btime _dot_prod_lv2A!(yi, xi, w_flat)
+# @time yi_out = _point_conv_lv2A!(yi, xi, w_flat);
+# @btime yi_out = _point_conv_lv2A!(yi, xi, w_flat);
 
-function my_conv_3!(y, x, w)
+function my_conv_2A!(y, x, w)
     y .= 0
     w_flat = reshape(w, 8, :)
     @threads for b in axes(x, 4)
@@ -124,37 +124,37 @@ function my_conv_3!(y, x, w)
         for hi in axes(x, 3)
             for wi in axes(x, 2)
                 xi = reshape(view(x, :, wi, hi, b), 8)
-                view(y, :, wi:wi+2, hi:hi+2, b) .+= _point_conv_lv!(yi, xi, w_flat);
+                view(y, :, wi:wi+2, hi:hi+2, b) .+= _point_conv_lv2A!(yi, xi, w_flat);
             end
         end
     end
     return nothing
 end
 
-@time my_conv_3!(y, x, w);
+@time my_conv_2A!(y, x, w);
 # 834.700 μs (50339 allocations: 2.33 MiB)
-@btime my_conv_3!($y, $x, $w);
+@btime my_conv_2A!($y, $x, $w);
 std(y)
 std(y[:, 3:end-2, 3:end-2, :])
 
-@code_warntype my_conv_3!(y, x, w);
+@code_warntype my_conv_2A!(y, x, w);
 
-function my_conv_3(x::T, w::T) where {T}
+function my_conv_2A(x::T, w::T) where {T}
     y = zeros(Float32, CO, W + 2, H + 2, B)::Array{Float32, 4}
-    my_conv_3!(y, x, w)
+    my_conv_2A!(y, x, w)
     return y
 end
 
-@time y3 = my_conv_3(x, w);
+@time y3 = my_conv_2A(x, w);
 # 1.014 ms (50343 allocations: 4.09 MiB)
-@btime my_conv_3($x, $w);
+@btime my_conv_2A($x, $w);
 std(y3)
 std(y3[:, 3:end-2, 3:end-2, :])
 
-@code_warntype my_conv_3(x, w);
+@code_warntype my_conv_2A(x, w);
 
 using Enzyme
-loss(x, w) = sum(my_conv_3(x, w))
+loss(x, w) = sum(my_conv_2A(x, w))
 dw = zero(w);
 @time loss(x, w)
 grads = Enzyme.autodiff(Reverse, loss, Const(x), Duplicated(w, dw));
