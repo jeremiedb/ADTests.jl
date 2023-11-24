@@ -10,6 +10,10 @@ using Random: seed!
 # using NNlibCUDA
 using BenchmarkTools
 
+####################################################################################################################################
+# This approach takes a single x location (W,H) and compute the effect over the full output kernel
+# The complete effect on y location (W,H) is the sum of all the iterations of x locations that overlay with it
+####################################################################################################################################
 
 # width, height, channels, batchsize
 CI = 8
@@ -152,13 +156,5 @@ std(y3[:, 3:end-2, 3:end-2, :])
 using Enzyme
 loss(x, w) = sum(my_conv_3(x, w))
 dw = zero(w);
-#############################################
-# im2col algo
-#############################################
-# w = randn(Float32, 3, 3, 5, 7);
-# m(w, x) = conv(x, w)
-# x = randn(Float32, (3, 3, 5, 8));
-# size(x)
-# @time m(w, x);
 @time loss(x, w)
 grads = Enzyme.autodiff(Reverse, loss, Const(x), Duplicated(w, dw));
