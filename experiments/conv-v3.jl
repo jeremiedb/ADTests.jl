@@ -42,7 +42,7 @@ std(y_nlib)
 
 
 function _dot_prod_3!(C, A, B)
-    for n ∈ axes(A, 1)
+    @turbo for n ∈ axes(A, 1)
         Cn = zero(eltype(C))
         for k ∈ eachindex(B)
             Cn += A[n, k] * B[k]
@@ -67,11 +67,12 @@ _point_conv_3!(yi, w_flat, xi_flat)
 # @time yi_out = _point_conv_3!(yi, xi, w_flat);
 # @btime yi_out = _point_conv_3!(yi, xi, w_flat);
 
-function my_conv_3A!(y, x, w_flat)
+function my_conv_3A!(y, x, w)
     y .= 0
-    # w_flat = reshape(w, CO, 72)::Array{Float32,2}
-    for b in axes(y, 4)
-        yi = zeros(Float32, 16)
+    szw = size(w)
+    w_flat = reshape(w, first(szw), :)
+    @threads for b in axes(y, 4)
+        yi = zeros(Float32, first(szw))
         for hi in axes(y, 3)
             for wi in axes(y, 2)
                 xi = reshape(x[:, wi:wi+2, hi:hi+2, b], :)
@@ -82,25 +83,26 @@ function my_conv_3A!(y, x, w_flat)
     return nothing
 end
 
-w_flat = reshape(w, CO, :)
-@time my_conv_3A!(y, x, w_flat);
+# w_flat = reshape(w, CO, :)
+@time my_conv_3A!(y, x, w);
 # 834.700 μs (50339 allocations: 2.33 MiB)
-@btime my_conv_3A!($y, $x, $w_flat);
+@btime my_conv_3A!($y, $x, $w);
 std(y)
-@code_warntype my_conv_3A!(y, x, w_flat);
+@code_warntype my_conv_3A!(y, x, w);
 
 function my_conv_3A(x::T, w::A) where {T,A}
-    y = zeros(Float32, 16, 26, 26, 32)::Array{Float32,4}
+    szx = size(x)
+    szw = size(w)
+    y = zeros(Float32, first(szw), szx[2] - 2, szx[3] - 2, szx[4])
     my_conv_3A!(y, x, w)
     return y
 end
 
-@time y3 = my_conv_3A(x, w_flat);
+@time y3 = my_conv_3A(x, w);
 # 1.014 ms (50343 allocations: 4.09 MiB)
-@btime my_conv_3A($x, $w_flat);
+@btime my_conv_3A($x, $w);
 std(y3)
-
-@code_warntype my_conv_3A(x, w_flat);
+@code_warntype my_conv_3A(x, w);
 
 loss(x, w) = sum(my_conv_3A(x, w))
 dw = zero(w_flat);
@@ -126,8 +128,6 @@ loss(x, w)
 grads = Enzyme.autodiff(Reverse, loss, Const(x), Duplicated(w, dw));
 
 
-
-using Enzyme
 
 function my_conv_1(x, w)
     y = zero(x)
@@ -181,3 +181,38 @@ loss3(x, w) = sum(my_conv_3(x, w))
 dw = zero(w);
 loss3(x, w)
 grads = Enzyme.autodiff(Reverse, loss3, Const(x), Duplicated(w, dw));
+
+
+
+function my_conv_4(x, w)
+    y = zero(x)
+    for hi in axes(y, 2)
+        y[1] += w[1] * x[1, hi]
+    end
+    return y
+end
+x = rand(Float32, 3, 5);
+w = rand(Float32, 3);
+y = my_conv_4(x, w);
+loss4(x, w) = sum(my_conv_4(x, w))
+dw = zero(w);
+loss4(x, w)
+grads = Enzyme.autodiff(Reverse, loss4, Const(x), Duplicated(w, dw));
+
+
+function my_conv_4_lv(x, w)
+    y = zero(x)
+    @turbo for hi in axes(x, 2)
+        for k in axes(x, 1)
+            y[k] += w[k] * x[k, hi]
+        end
+    end
+    return y
+end
+x = rand(Float32, 3, 5);
+w = rand(Float32, 3);
+y = my_conv_4_lv(x, w);
+loss4_lv(x, w) = sum(my_conv_4_lv(x, w))
+dw = zero(w);
+loss4_lv(x, w)
+grads = Enzyme.autodiff(Reverse, loss4_lv, Const(x), Duplicated(w, dw));
