@@ -14,21 +14,6 @@ using BenchmarkTools
 ####################################################################################################################################
 # Skip LV to see if Enzyme can handle it
 ####################################################################################################################################
-
-# width, height, channels, batchsize
-CI = 8
-CO = 16
-B = 32
-W = 28
-H = 28
-KW = KH = 3
-
-# C,W,H,B
-# seed!(123)
-w = randn(Float32, CO, CI, KW, KH);
-x = randn(Float32, CI, W, H, B);
-y = zeros(Float32, CO, W - 2, H - 2, B);
-
 function my_conv_1(x, w)
     y = zero(x)
     for b in axes(x, 2)
@@ -38,7 +23,7 @@ function my_conv_1(x, w)
     end
     return y
 end
-x = rand(Float32, 3, 8);
+x = rand(Float32, 3, 5);
 w = rand(Float32, 3);
 y = my_conv_1(x, w);
 @btime y = my_conv_1($x, $w);
